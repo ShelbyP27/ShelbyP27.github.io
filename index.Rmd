@@ -1,0 +1,20 @@
+---
+title: "index"
+author: "Shelby Provost"
+date: "7/12/2021"
+output: html_document
+---
+
+# Shelby Provost 
+
+## Background 
+### Childhood
+I was born and raised in Oklahoma and graduated from Edmond North High School in 2017. 
+
+### College 
+I attended Florida State University and received a Bachelor of Science in Statistics in 2020. 
+
+## Current Lifestyle 
+I am attending Southern Methodist University's MSDS Program while working full time as an E-Comm AR Analyst.
+
+### The other tabs represent work / analyses that I have completed.  Please check them out!
