@@ -1,0 +1,341 @@
+---
+title: "CaseStudy1"
+author: "Shelby Provost"
+date: "6/24/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Given the Beers data set, containing information of 2410 US craft beers, and the Breweries data set, containing 558 US breweries, an exploratory data analysis (EDA) was performed to extract potential insights from the data. 
+
+The first step of the analysis is to import and merge the breweries data with the beers data.
+```{r Importing and Merging the Data, echo=FALSE, message=FALSE, warning=FALSE}
+## Importing both breweries and beers data sets
+Breweries <- read.csv("C:/Users/Shelby/Downloads/MSDS_6306_Doing-Data-Science-Master (1)/MSDS_6306_Doing-Data-Science-Master/Unit 8 and 9 Case Study 1/Breweries.csv")
+Beers <- read.csv("C:/Users/Shelby/Downloads/MSDS_6306_Doing-Data-Science-Master (1)/MSDS_6306_Doing-Data-Science-Master/Unit 8 and 9 Case Study 1/Beers.csv")
+
+## Merging the data sets
+## Brewery ID was labeled different in the data sets
+BeersAndBrews = merge(Beers,Breweries, by.x = "Brewery_id", by.y = "Brew_ID")
+
+## Printing first 6 and last 6 observations to check merged file
+head(BeersAndBrews,6)
+tail(BeersAndBrews,6)
+```
+Then a visual representation of the number of breweries in each state is created with a bar chart ordered from most to least number of breweries. The top 5 and bottom 5 states are extracted from the ordered data as well.
+```{r Number of Breweries Bar Chart, echo=FALSE, message=FALSE, warning=FALSE}
+library(tidyverse)
+## Bar chart showing number of breweries in each state
+Breweries %>% group_by(State) %>% summarise(count = n()) %>% ggplot(aes(x = reorder(State, -count), y = count)) + geom_col(fill = "darkred") + theme(axis.text.x = element_text(angle = 90)) + ggtitle("Number of Breweries in Each State") + xlab("State") + ylab("Number of Breweries") + geom_text(aes(label = count), hjust = 1, color = "white", angle=90)
+
+## Creating an ordered data set
+BrewsOrdered = Breweries %>% group_by(State) %>% summarise(count = n()) %>% arrange(count)
+## Bottom 5 states are at the head of the data
+head(BrewsOrdered, 5)
+## Top 5 states are at the tail of the data
+tail(BrewsOrdered, 5)
+
+
+## Colorado's % of total Breweries
+47 / nrow(unique(BeersAndBrews[c("State","Brewery_id")]))
+```
+The states with the most breweries are Colorado, California, Michigan, Oregon, and Texas.
+With 47 breweries, Colorado is home to 8.4% of the breweries. 
+The states with the least breweries are District of Columbia, North Dakota, South Dakota, and West Virginia.
+
+To perform additional analysis, the merged data is checked for NA's.
+```{r Addressing NAs, echo=FALSE, message=FALSE, warning=FALSE}
+## Checking the data for NAs
+data.frame(
+  sapply(BeersAndBrews, function(x){ if(sum(is.na(x))>0){
+    print("Has NA")}
+    else {
+      print("")}}))
+
+## Summarizing the NAs of ABV and IBU to get the count
+summary(is.na(BeersAndBrews$ABV))
+summary(is.na(BeersAndBrews$IBU))
+```
+The ABV variable has 62 NA values and the IBU variable has 1005 NA values. The NA's will stay in the merged data set, however they will be filtered out when necessary throughout the analysis. 
+
+The median ABV and IBU by state are computed and visually represented with the NA values removed.
+```{r, Medians for ABV and IBU, echo=FALSE, message=FALSE, warning=FALSE}
+## Compute median IBU/ABV per state
+abv_medians <- BeersAndBrews[c('State','ABV')] %>% filter(!is.na(ABV)) %>% group_by(State) %>%
+summarise(Median_ABV = median(ABV))
+
+ibu_medians <- BeersAndBrews[c('State','IBU')]  %>% filter(!is.na(IBU)) %>% group_by(State) %>%
+summarise(Median_IBU = median(IBU))
+
+## Visually representing medians with bar charts
+BeersAndBrews[c('State','ABV')] %>% filter(!is.na(ABV)) %>% group_by(State) %>%
+summarise(Median_ABV = median(ABV)) %>% ggplot(aes(x = reorder(State, -Median_ABV), y = Median_ABV)) +
+geom_bar(stat = 'identity') + geom_col(fill = "darkred") + theme(axis.text.x = element_text(angle = 90))  + xlab("State") + ylab("Median ABV of Beers") + ggtitle("Median ABV By State (All States By Median; Missing Values Removed), Sorted Descending") + geom_text(aes(label = Median_ABV), hjust = 1, color = "white", angle = 90)
+
+ABV_med_all = BeersAndBrews %>% filter(!is.na(ABV)) %>% summarise(Med_ABV_All = median(ABV))
+ABV_med_all
+
+BeersAndBrews[c('State','IBU')]  %>% filter(!is.na(IBU)) %>% group_by(State) %>% summarise(Median_IBU = median(IBU)) %>% ggplot(aes(x = reorder(State, -Median_IBU), y = Median_IBU)) + geom_bar(stat = 'identity') + geom_col(fill = "darkred") + theme(axis.text.x = element_text(angle = 90)) + xlab("State") + ylab("Median IBU of Beers") + ggtitle("Median IBU By State (All States By Median; Missing Values Removed), Sorted Descending") + geom_text(aes(label = Median_IBU), hjust = 1, color = "white", angle = 90)
+
+IBU_med_all = BeersAndBrews %>% filter(!is.na(IBU)) %>% summarize(Med_IBU_All = median(IBU))
+IBU_med_all
+```
+The states with the highest ABV and the highest IBU are extracted. 
+```{r Maximum ABV and IBU, echo=FALSE, message=FALSE, warning=FALSE}
+## Pasting a sentence for maximum ABV
+paste0("State with the maximum alcoholic beer: ", BeersAndBrews[which.max(BeersAndBrews$ABV), ]$State, ", ", BeersAndBrews[which.max(BeersAndBrews$ABV), ]$Name.x, " from ", BeersAndBrews[which.max(BeersAndBrews$ABV), ]$Name.y, ", with an alcohol percentage of ", 100*BeersAndBrews[which.max(BeersAndBrews$ABV), ]$ABV, "%")
+
+#Pasting a sentence for maximum IBU
+paste0("State with the maximum bitterness: ", BeersAndBrews[which.max(BeersAndBrews$IBU), ]$State, ", ", BeersAndBrews[which.max(BeersAndBrews$IBU), ]$Name.x, " from ", BeersAndBrews[which.max(BeersAndBrews$IBU), ]$Name.y, " with an IBU of ", BeersAndBrews[which.max(BeersAndBrews$IBU), ]$IBU)
+```
+The distribution of the alcoholic content is examined further. 
+```{r ABV Distribution, echo=FALSE, message=FALSE, warning=FALSE}
+## Histogram of ABV to assess the distribution
+BeersAndBrews[c('ABV')] %>% filter(!is.na(ABV)) %>% ggplot(aes(x = ABV)) + geom_histogram(fill = "darkred") + theme(axis.text.x = element_text(angle = 90)) + xlab("ABV") + ylab("Occurences of ABV (% Alcohol Content)") + ggtitle("Distribution of Beer Alcoholic Content")
+```
+The distribution of the alcoholic content appears to be slightly right skewed. There also is evidence of an outlier.
+
+The distribution of the international bitterness is examined further. 
+```{r IBU Distribution, echo=FALSE, message=FALSE, warning=FALSE}
+## Histogram of IBU to assess the distribution
+BeersAndBrews[c('IBU')] %>% filter(!is.na(IBU)) %>% ggplot(aes(x = IBU)) + geom_histogram(fill = "darkred") + theme(axis.text.x = element_text(angle = 90)) + xlab("IBU") + ylab("Occurences of IBU ( International Bitterness)") + ggtitle("Distribution of Beer International Bitterness")
+```
+The distribution of the international bitterness appears to be right skewed. 
+
+Then, ABV and IBU are assessed for a relationship.
+```{r Relationship, echo=FALSE, message=FALSE, warning=FALSE}
+## Scatter plot with a trend line 
+BeersAndBrews[c('ABV', 'IBU')] %>% filter(!is.na(ABV) & !is.na(IBU)) %>% ggplot(aes(x = ABV, y = IBU)) + geom_point(col = "darkred") + geom_smooth(method = 'lm', se = TRUE, col = "red") + ggtitle("Relationship Between Alcoholic Content (ABV) & International Bitterness Score (IBU) - Scatter Plot & Trend Line") + theme(plot.title = element_text(size=15))
+
+## Hypothesis Test for relationship
+summary(lm(IBU ~ ABV , data = BeersAndBrews))
+```
+There is evidence of a linear relationship between ABV and IBU. This can be seen by the regression line showing a positive trend in the data.The higher the ABV, the larger the residuals appear to be, however this is not evidence against the trend since it is likely due to a smaller amount of data points in that range. 
+A test was performed concluding that this visual relationship is significant. It provided a linear regression estimate of: IBU = -34.1 + 1282.037(ABV).
+
+Style flags are used to prepare the data for machine learning. 
+```{r Machine Learning Set Up, echo=FALSE, message=FALSE, warning=FALSE}
+## Quick table of Styles
+table(BeersAndBrews$Style)
+## Creating Style Flags
+BeersAndBrews$IPA <- ifelse(grepl("IPA", BeersAndBrews$Style),1,0)
+BeersAndBrews$AmericanIPA <- ifelse(grepl("American IPA", BeersAndBrews$Style),1,0)
+BeersAndBrews$APA <- ifelse(grepl("American Pale Ale", BeersAndBrews$Style),1,0)
+BeersAndBrews$Porter <- ifelse(grepl("Porter", BeersAndBrews$Style),1,0)
+BeersAndBrews$Lager <- ifelse(grepl("Lager", BeersAndBrews$Style),1,0)
+BeersAndBrews$Blonde <- ifelse(grepl("Blonde Ale", BeersAndBrews$Style),1,0)
+BeersAndBrews$RedAle <- ifelse(grepl("Red Ale", BeersAndBrews$Style),1,0)
+BeersAndBrews$BlackAle <- ifelse(grepl("Black Ale", BeersAndBrews$Style),1,0)
+BeersAndBrews$Stout <- ifelse(grepl("Stout", BeersAndBrews$Style),1,0)
+BeersAndBrews$WheatAle <- ifelse(grepl("Wheat Ale", BeersAndBrews$Style),1,0)
+BeersAndBrews$American <- ifelse(grepl("American", BeersAndBrews$Style),1,0)
+BeersAndBrews$English <- ifelse(grepl("English", BeersAndBrews$Style),1,0)
+BeersAndBrews$Ale <- ifelse(grepl("Ale", BeersAndBrews$Style),1,0)
+
+## Assigning flag for Ales that are not IPAs
+BeersAndBrews$Ale_but_not_IPA <- ifelse(BeersAndBrews$Ale + BeersAndBrews$IPA == 2, 0, ifelse(BeersAndBrews$Ale == 1, 1, 0))
+
+## If-Else Oregon / Wisconsin
+BeersAndBrews$OR_WI <- ifelse(BeersAndBrews$State == "WI" | BeersAndBrews$State == "OR", 1, 0)
+# Getting our highest IBU States
+BeersAndBrews$top_states <- ifelse(grepl("ME|WV|FL|GA|DE|NM|NH", BeersAndBrews$State),1,0)
+
+## Establishing a formula
+f = as.formula(IBU ~ ABV*IPA + Stout + APA + Porter + Lager + Blonde +
+                 RedAle + BlackAle  + WheatAle + American + English + top_states)
+```
+KNN classification is used to investigate the relationship of ABV and IBU between India Pale Ales (IPA) and all other types of Ales.
+```{r KNN Classification Prep, echo=FALSE, message=FALSE, warning=FALSE}
+#Splitting the data 80/20 to make a train and test set
+set.seed(2021)
+BeersAndBrews_complete <- BeersAndBrews %>% filter(!is.na(ABV) & !is.na(IBU))
+train_idx <- sample(1:nrow(BeersAndBrews_complete), as.integer(0.8*(nrow(BeersAndBrews_complete))))
+train <- BeersAndBrews_complete[train_idx, ]
+test <- BeersAndBrews_complete[-train_idx, ]
+```
+The training data set contains 80% of the data, while the test data set contains the remaining 20%. 
+
+KNN classifications of IPA's
+```{r KNN IPA, echo=FALSE, message=FALSE, warning=FALSE}
+library(class)
+library(caret)
+
+## Building parameters for a function
+knn_train = train[c('IBU', 'ABV', 'IPA')]
+knn_test = test[c('IBU', 'ABV', 'IPA')]
+
+## Creating a function to test models for optimal k
+test_models <- function(train, test, validation_colname, cl, k_start, k_end, test_df){
+  model_num <- c()
+  acc <- c()
+  for(k in k_start:k_end){
+    knn_model <- knn(train = train, test = test,  cl = cl, k = k, prob = TRUE)
+    model_acc <- 100 * sum(test[[validation_colname]] == knn_model)/NROW(test[[validation_colname]])
+    model_num <- append(model_num, k)
+    acc <- append(acc, model_acc)
+  }
+  model_eval <- data.frame("Num_Neighbors" = model_num, "Accuracy" = acc)
+  return(model_eval)
+}
+
+## Plotting the accuracy
+test_models(train = knn_train, test = knn_test, validation_colname = "IPA", cl = train$IPA, k_start = 2, k_end = 50, test_df = test) %>% ggplot(aes(x=Num_Neighbors, y = Accuracy))  + geom_point() + ggtitle("Accuracy AAFO Neighbors (k) - IPAs")
+
+## Making the optimal model
+knn_model_Ales <- knn(train = knn_train, test = knn_test, cl = knn_train$IPA, k = 2, prob = FALSE)
+
+## Showing the confusion Matrix
+paste0("Confusion Matrix of Ale Classification")
+confusionMatrix(table(knn_model_Ales, knn_test$IPA))
+```
+This model is 98.93% accurate in predicting whether a beer is an IPA using ABV and IBU.We are 95% confident that the true accuracy is between 96.91% and 99.78%. 
+
+KNN classification of all other Ales.
+```{r KNN All Other Ales, echo=FALSE, message=FALSE, warning=FALSE}
+## Building parameters for a function
+knn_train = train[c('IBU', 'ABV', 'Ale_but_not_IPA')]
+knn_test = test[c('IBU', 'ABV', 'Ale_but_not_IPA')]
+
+## Creating a function to test models for optimal k
+test_models <- function(train, test, validation_colname, cl, k_start, k_end, test_df){
+  model_num <- c()
+  acc <- c()
+  for(k in k_start:k_end){
+    knn_model <- knn(train = train, test = test,  cl = cl, k = k, prob = TRUE)
+    model_acc <- 100 * sum(test[[validation_colname]] == knn_model)/NROW(test[[validation_colname]])
+    model_num <- append(model_num, k)
+    acc <- append(acc, model_acc)
+  }
+  model_eval <- data.frame("Num_Neighbors" = model_num, "Accuracy" = acc)
+  return(model_eval)
+}
+
+## Plotting the accuracy
+test_models(train = knn_train, test = knn_test, validation_colname = "Ale_but_not_IPA", cl = train$Ale_but_not_IPA, k_start = 2, k_end = 50, test_df = test) %>% ggplot(aes(x=Num_Neighbors, y = Accuracy))  + geom_point() + ggtitle("Accuracy AAFO Neighbors (k) - IPAs")
+
+## Making the optimal model
+knn_model_Ales <- knn(train = knn_train, test = knn_test, cl = knn_train$Ale_but_not_IPA, k = 2, prob = FALSE)
+
+## Showing the confusion Matrix
+paste0("Confusion Matrix of Ale Classification")
+confusionMatrix(table(knn_model_Ales, knn_test$Ale_but_not_IPA))
+```
+This model is 98.93% accurate in predicting whether a beer is an Ale other than IPA using ABV and IBU.We are 95% confident that the true accuracy is between 96.91% and 99.78%.
+
+A basic Machine Learning pipeline is used for IBU predictions of the data with missing values for IBU.  
+A "No Skill" prediction is leveraged as a baseline, then linear regression, random forest and XGBoost are tested. The accuracy on all test sets are then aggregated (via RMSE).
+```{r Machine Learning Pipeline, echo=FALSE, message=FALSE, warning=FALSE}
+## Baseline - No Skill
+## Plotting the actual vs. predicted values
+noskill_pred <- (mean(train$IBU, na.rm = TRUE) + mean(test$IBU, na.rm = TRUE))/2
+data.frame(actuals = test$IBU, yhat = noskill_pred) %>% ggplot(aes(x = actuals, y = yhat)) + geom_point() + ggtitle("Actuals vs. Predicted, No Skill (Mean) Prediction")
+
+# Storing the RMSE of Baseline
+noskill_rmse <- (data.frame(actuals = test$IBU, yhat = noskill_pred) %>% mutate(residual_sq = ((yhat - actuals)^2)^0.5) %>% summarise(sum(residual_sq, na.rm = TRUE) / length(test$IBU[!is.na(test$IBU)]))   )[1,1]
+
+noskill_train_rmse <- (data.frame(actuals = train$IBU, yhat = (mean(train$IBU, na.rm = TRUE) + mean(test$IBU, na.rm = TRUE))/2) %>% mutate(residual_sq = ((yhat - actuals)^2)^0.5) %>% summarise(sum(residual_sq, na.rm = TRUE) / length(train$IBU[!is.na(train$IBU)]))   )[1,1]
+
+##########################################################################################################
+## Linear Regression
+## Building the model for linear regression
+IBU_pred_lm <- lm(f,data = train)
+summary(IBU_pred_lm)
+
+## Plotting the actual vs. predicted values
+lm_pred <- predict(IBU_pred_lm, test)
+data.frame(actuals = test$IBU, yhat = lm_pred) %>% ggplot(aes(x = actuals, y = yhat)) + geom_point() + ggtitle("Actuals vs. Predicted, MLR")
+
+## Storing the RMSE of Linear Regression
+lm_rmse <- (data.frame(actuals = test$IBU, yhat = lm_pred) %>% mutate(residual_sq = ((yhat - actuals)^2)^0.5) %>% summarise(sum(residual_sq, na.rm = TRUE) / length(test$IBU[!is.na(test$IBU)])))[1,1]
+
+lm_train_rmse <- (data.frame(actuals = train$IBU, yhat = predict(IBU_pred_lm, train)) %>% mutate(residual_sq = ((yhat - actuals)^2)^0.5   ) %>% summarise(sum(residual_sq, na.rm = TRUE) / length(train$IBU[!is.na(train$IBU)])))[1,1]
+
+##########################################################################################################
+## Random Forest 
+library(randomForest)
+
+## Testing a random forest model
+compare_trees <- function(rng){
+  rmse <- c()
+  ntree <- c()
+  
+  for (i in rng){
+    rf_regressor = randomForest(f,data = train, ntree = i)
+    
+    test$yhat <- predict(rf_regressor, test)
+    test$rmse <- (((test$IBU - test$yhat)^2)^0.5)
+    
+    rmse <- append(rmse, sum(test$rmse / length(which(!is.na(test$rmse)))))
+    ntree <- append(ntree, i)
+  }
+  rf_comparison_df <- data.frame(rmse = rmse, ntree = ntree)
+  print(rf_comparison_df %>% ggplot(aes(x=ntree, y = rmse)) + geom_point() + ggtitle("RMSE By Number of   Trees") + geom_smooth(method = 'lm', se = TRUE))
+  
+  return(rf_comparison_df)
+  
+}
+
+## Timing this run for future tests
+system.time(compare_trees <- compare_trees(50:250))
+
+## Train the model
+rf_regressor <- randomForest(f,data = train, ntree = compare_trees[which.min(compare_trees$rmse), ]$ntree)
+
+## Predict and plot the predictions
+rf_pred <- predict(rf_regressor, test)
+
+data.frame(actuals = test$IBU, yhat = rf_pred) %>% ggplot(aes(x = actuals, y = yhat)) + geom_point() +ggtitle("Actuals vs. Predicted, RF")
+
+## Cross validation of the data set.
+library(rfUtilities)
+rf.crossValidation(x = rf_regressor, xdata = train, trace = TRUE, n = 10, bootstrap = TRUE, seed = 2021)
+
+## Store the RMSE of Random Forest
+rf_rmse <-  (data.frame(actuals = test$IBU, yhat = rf_pred) %>% mutate(residual_sq = ((yhat - actuals)^2)^0.5) %>% summarise(sum(residual_sq, na.rm = TRUE) / length(test$IBU[!is.na(test$IBU)])))[1,1]
+
+rf_train_rmse <- (data.frame(actuals = train$IBU, yhat = predict(rf_regressor, train)) %>% mutate(residual_sq = ((yhat - actuals)^2)^0.5) %>% summarise(sum(residual_sq, na.rm = TRUE) / length(train$IBU[!is.na(train$IBU)])))[1,1]
+
+##########################################################################################################
+## XGBoost
+library(xgboost)
+
+## Testing with XGBoost
+train_matrix <- as.matrix(train[c("ABV", "IPA", "AmericanIPA", "APA","Porter","Lager","Blonde","RedAle","BlackAle", "Stout","WheatAle","American","English", "top_states")])
+
+test_matrix <- as.matrix(test[c("ABV", "IPA", "AmericanIPA", "APA","Porter","Lager","Blonde","RedAle","BlackAle", "Stout","WheatAle","American","English", "top_states")])
+
+y_matrix_train <- as.matrix(train['IBU'])
+y_matrix_test <- as.matrix(test['IBU'])
+
+## Creating the model
+xgboost_model <- xgboost(data = train_matrix, label = y_matrix_train, max.depth = 50, eta = 1, nthread = 2, nrounds = 2, objective = "reg:squarederror", verbosity = 2)
+
+xg_pred <- predict(xgboost_model, test_matrix)
+
+## Plot the results
+data.frame(actuals = test$IBU, yhat = xg_pred) %>% ggplot(aes(x = actuals, y = yhat)) + geom_point() + ggtitle("Actuals vs. Predicted, XGBoost")
+
+## Storing the RMSE of RGBoost
+xg_rmse <- (data.frame(actuals = test$IBU, yhat = xg_pred) %>% mutate(residual_sq = ((yhat - actuals)^2)^0.5) %>% summarise(sum(residual_sq, na.rm = TRUE) / length(test$IBU[!is.na(test$IBU)])))[1,1]
+
+xg_train_rmse <- data.frame(actuals = test$IBU, yhat = predict(xgboost_model, test_matrix)) %>% mutate(residual_sq = ((yhat - actuals)^2)^0.5) %>% summarise( sum(residual_sq, na.rm = TRUE) / length(test$IBU[!is.na(test$IBU)]))
+```
+The RMSE accuracy on the models are finalized. 
+```{r Model Accuracies, echo=FALSE, message=FALSE, warning=FALSE}
+## Showing the results of ML Pipeline
+data.frame(xg_rmse = xg_rmse, rf_rmse = rf_rmse, lm_rmse = lm_rmse, noskill_rmse = noskill_rmse)
+```
+The optimal model, random forest, is used to predict all NA's in the original IBU data.
+```{r Predictions, echo=FALSE, message=FALSE, warning=FALSE}
+## Predicting the missing IBU values from original data
+BeersAndBrews$IBU <- ifelse(is.na(BeersAndBrews$IBU), predict(rf_regressor, BeersAndBrews), BeersAndBrews$IBU)
+
+## Plotting the new, imputed data set.
+BeersAndBrews[c('ABV', 'IBU')] %>% filter(!is.na(ABV) & !is.na(IBU)) %>% ggplot(aes(x = ABV, y = IBU)) + geom_point(col = "darkred") + geom_smooth(method = 'lm', se = TRUE, col = "red") + ggtitle("Relationship Between Alcoholic Content (ABV) & International Bitterness Score (IBU) - Scatter Plot With IBU Predictions") + theme(plot.title = element_text(size=15))
+
+BeersAndBrews[c('State','IBU')]  %>% filter(!is.na(IBU)) %>% group_by(State) %>% summarise(Median_IBU = median(IBU)) %>% ggplot(aes(x = reorder(State, -Median_IBU), y = Median_IBU)) + geom_bar(stat = 'identity') + geom_col(fill = "darkred") + theme(axis.text.x = element_text(angle = 90)) + xlab("State") + ylab("Median IBU of Beers") + ggtitle("Median IBU By State (All States By Median; with IBU Predictions), Sorted Descending") + geom_text(aes(label = Median_IBU), hjust = 1, color = "white", angle = 90)
+```
+After performing an exploratory data analysis, interest regarding the missing IBU values led to a machine learning pipeline. While 3 models were tested, the random forest model is the most optimal. The model was used to estimate these missing values and were plotted along with the original data. 
