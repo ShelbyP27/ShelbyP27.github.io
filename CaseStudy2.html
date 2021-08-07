@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Shelby Provost" />
+
+
+<title>DS6306-CaseStudy2</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.tab('show');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">My Website</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">About Me</a>
+</li>
+<li>
+  <a href="CaseStudy1.html">Beer Study</a>
+</li>
+<li>
+  <a href="CaseStudy2.html">Attrition Study</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">DS6306-CaseStudy2</h1>
+<h4 class="author">Shelby Provost</h4>
+<h4 class="date">8/4/2021</h4>
+
+</div>
+
+
+<div id="executive-summary" class="section level2">
+<h2>Executive Summary</h2>
+<p>DDSAnalytics would like to predict employee turnover for Frito Lay employees. Given an existing data set with 32 potential predictor variables for attrition, a brief analysis was conducted. Interesting insights, job specific trends, a model for predicting attrition, and a model for predicting salary were obtained from this data.</p>
+</div>
+<div id="importing-the-data-set" class="section level2">
+<h2>Importing the Data Set</h2>
+</div>
+<div id="exploring-the-data" class="section level2">
+<h2>Exploring the data</h2>
+<pre><code>##  No Yes 
+## 730 140</code></pre>
+<pre><code>## [1] 0.8390805</code></pre>
+<p><img src="CaseStudy2_files/figure-html/Exploring-1.png" width="672" /><img src="CaseStudy2_files/figure-html/Exploring-2.png" width="672" /><img src="CaseStudy2_files/figure-html/Exploring-3.png" width="672" /> Exploring the data generally, we see that there are a few interesting observations about the data. First, there are 730 employees retained and 140 employees lost. This creates a retention rate of 83.9%. Also, the age of attrition appears to be lower than the age of retention. There does not appear to be a linear relationship between the age of an employee and their monthly income. There also does not appear to be a difference in the hourly income by gender.</p>
+</div>
+<div id="exploring-job-specific-trends" class="section level2">
+<h2>Exploring Job Specific Trends</h2>
+<p><img src="CaseStudy2_files/figure-html/Job%20Specific%20Trends-1.png" width="672" /><img src="CaseStudy2_files/figure-html/Job%20Specific%20Trends-2.png" width="672" /><img src="CaseStudy2_files/figure-html/Job%20Specific%20Trends-3.png" width="672" /><img src="CaseStudy2_files/figure-html/Job%20Specific%20Trends-4.png" width="672" /><img src="CaseStudy2_files/figure-html/Job%20Specific%20Trends-5.png" width="672" /></p>
+<pre><code>##                     JobRole countTot NumAttrition NumRetention PercentAttrition PercentRetention
+## 1 Healthcare Representative       76            8           68        10.526316         89.47368
+## 2           Human Resources       27            6           21        22.222222         77.77778
+## 3     Laboratory Technician      153           30          123        19.607843         80.39216
+## 4                   Manager       51            4           47         7.843137         92.15686
+## 5    Manufacturing Director       87            2           85         2.298851         97.70115
+## 6         Research Director       51            1           50         1.960784         98.03922
+## 7        Research Scientist      172           32          140        18.604651         81.39535
+## 8           Sales Executive      200           33          167        16.500000         83.50000
+## 9      Sales Representative       53           24           29        45.283019         54.71698</code></pre>
+<p><img src="CaseStudy2_files/figure-html/Job%20Specific%20Trends-6.png" width="672" /><img src="CaseStudy2_files/figure-html/Job%20Specific%20Trends-7.png" width="672" /> Exploring job role specific trends, we find that Managers have the highest average hourly rate while human resources have the lowest. Health Care representatives have the highest average job satisfaction while research directors have the lowest. Human resources have the highest average relationship satisfaction with their managers while research directors have the lowest. Managers have the highest average number of years with the company while sales representatives have the lowest. Which is unsurprising that we find that sales representatives have the highest attrition rate. Research directors have the highest retention rate which may seem odd as we found that research directors have the lowest average job satisfaction and the lowest average relationship satisfaction with their managers. It is also interesting that we found that human resource employees have the highest relationship satisfaction with their managers as they also have the lowest average hourly rate. Nonetheless, these relationships show insights into the reasons employees may choose to stay with the company or leave.</p>
+</div>
+<div id="creating-the-best-models" class="section level2">
+<h2>Creating the Best Models</h2>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##      
+##        No Yes
+##   No  640  51
+##   Yes  90  89
+##                                           
+##                Accuracy : 0.8379          
+##                  95% CI : (0.8117, 0.8618)
+##     No Information Rate : 0.8391          
+##     P-Value [Acc &gt; NIR] : 0.559069        
+##                                           
+##                   Kappa : 0.4606          
+##                                           
+##  Mcnemar&#39;s Test P-Value : 0.001373        
+##                                           
+##             Sensitivity : 0.8767          
+##             Specificity : 0.6357          
+##          Pos Pred Value : 0.9262          
+##          Neg Pred Value : 0.4972          
+##              Prevalence : 0.8391          
+##          Detection Rate : 0.7356          
+##    Detection Prevalence : 0.7943          
+##       Balanced Accuracy : 0.7562          
+##                                           
+##        &#39;Positive&#39; Class : No              
+## </code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##      
+##        No Yes
+##   No  638  52
+##   Yes  92  88
+##                                           
+##                Accuracy : 0.8345          
+##                  95% CI : (0.8081, 0.8586)
+##     No Information Rate : 0.8391          
+##     P-Value [Acc &gt; NIR] : 0.664134        
+##                                           
+##                   Kappa : 0.4505          
+##                                           
+##  Mcnemar&#39;s Test P-Value : 0.001154        
+##                                           
+##             Sensitivity : 0.8740          
+##             Specificity : 0.6286          
+##          Pos Pred Value : 0.9246          
+##          Neg Pred Value : 0.4889          
+##              Prevalence : 0.8391          
+##          Detection Rate : 0.7333          
+##    Detection Prevalence : 0.7931          
+##       Balanced Accuracy : 0.7513          
+##                                           
+##        &#39;Positive&#39; Class : No              
+## </code></pre>
+<p><img src="CaseStudy2_files/figure-html/Model-1.png" width="672" /><img src="CaseStudy2_files/figure-html/Model-2.png" width="672" /><img src="CaseStudy2_files/figure-html/Model-3.png" width="672" /></p>
+<pre><code>## 
+## Call:
+## lm(formula = MonthlyIncome ~ Education + JobLevel + YearsWithCurrManager, 
+##     data = CaseStudy2.data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -5008.8  -933.4    63.8   712.0  3777.3 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)          -1791.10     162.25 -11.039   &lt;2e-16 ***
+## Education               18.35      47.24   0.389   0.6977    
+## JobLevel              4048.07      47.47  85.283   &lt;2e-16 ***
+## YearsWithCurrManager   -30.49      14.41  -2.116   0.0346 *  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 1411 on 866 degrees of freedom
+## Multiple R-squared:  0.9061, Adjusted R-squared:  0.9058 
+## F-statistic:  2786 on 3 and 866 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div id="youtube-presentation-link" class="section level2">
+<h2>YouTube Presentation Link</h2>
+<p><a href="https://youtu.be/zBg-wziVkCs" target="_blank">YouTube Presentation</a></p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

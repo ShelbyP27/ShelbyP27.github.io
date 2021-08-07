@@ -247,6 +247,9 @@ $(document).ready(function () {
 <li>
   <a href="CaseStudy1.html">Beer Study</a>
 </li>
+<li>
+  <a href="CaseStudy2.html">Attrition Study</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         
@@ -541,7 +544,7 @@ A “No Skill” prediction is leveraged as a baseline, then linear regression, 
 ## F-statistic: 210.3 on 14 and 1109 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p><img src="CaseStudy1_files/figure-html/Machine%20Learning%20Pipeline-2.png" width="672" /><img src="CaseStudy1_files/figure-html/Machine%20Learning%20Pipeline-3.png" width="672" /></p>
 <pre><code>##    user  system elapsed 
-##   35.31    1.55   36.95</code></pre>
+##   36.47    1.96   38.61</code></pre>
 <p><img src="CaseStudy1_files/figure-html/Machine%20Learning%20Pipeline-4.png" width="672" /></p>
 <pre><code>## Bootstrap sampling is being applied, p=0.1 argument is ignored 
 ## running: regression cross-validation with 10 iterations 
@@ -567,9 +570,9 @@ A “No Skill” prediction is leveraged as a baseline, then linear regression, 
 ## RMSE cross-validation error variance = 0.3595239 
 ## MBE cross-validation error variance = 0.07097777 
 ## MAE cross-validation error variance = 0.05892349</code></pre>
-<pre><code>## [15:04:32] INFO: amalgamation/../src/tree/updater_prune.cc:101: tree pruning end, 40 extra nodes, 0 pruned nodes, max_depth=8
+<pre><code>## [18:12:13] INFO: amalgamation/../src/tree/updater_prune.cc:101: tree pruning end, 40 extra nodes, 0 pruned nodes, max_depth=8
 ## [1]  train-rmse:12.960311 
-## [15:04:32] INFO: amalgamation/../src/tree/updater_prune.cc:101: tree pruning end, 502 extra nodes, 0 pruned nodes, max_depth=24
+## [18:12:13] INFO: amalgamation/../src/tree/updater_prune.cc:101: tree pruning end, 502 extra nodes, 0 pruned nodes, max_depth=24
 ## [2]  train-rmse:10.572154</code></pre>
 <p><img src="CaseStudy1_files/figure-html/Machine%20Learning%20Pipeline-5.png" width="672" /> The RMSE accuracy on the models are finalized.</p>
 <pre><code>##    xg_rmse  rf_rmse  lm_rmse noskill_rmse

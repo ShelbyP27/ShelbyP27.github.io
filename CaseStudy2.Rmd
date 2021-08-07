@@ -1,0 +1,138 @@
+---
+title: "DS6306-CaseStudy2"
+author: "Shelby Provost"
+date: "8/4/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Executive Summary 
+DDSAnalytics would like to predict employee turnover for Frito Lay employees. Given an existing data set with 32 potential predictor variables for attrition, a brief analysis was conducted. Interesting insights, job specific trends, a model for predicting attrition, and a model for predicting salary were obtained from this data. 
+
+
+## Importing the Data Set
+```{r Importing , echo=FALSE, message=FALSE, warning=FALSE}
+CaseStudy2.data <- read.csv("C:/Users/Shelby/Desktop/CaseStudy2-data.csv")
+```
+
+## Exploring the data
+```{r Exploring, echo=FALSE, message=FALSE, warning=FALSE}
+# Loading in librarys
+library(ggplot2)
+library(tidyverse)
+
+# Changing Attrition to a factor so that I can see how many are in each category. 
+CaseStudy2.data$Attrition = as.factor(CaseStudy2.data$Attrition)
+summary(CaseStudy2.data$Attrition)
+# There are 730 No's and 140 Yes's
+
+# Finding the retention rate.
+730/870
+# The retention rate is 83.9% 
+
+# Changing Attrition back to a character. 
+CaseStudy2.data$Attrition = as.character(CaseStudy2.data$Attrition)
+
+# Visually checking the distribution of Age of Attrition. 
+CaseStudy2.data %>% ggplot(aes(x = Attrition, y = Age)) + geom_boxplot(fill = "red") + ggtitle("Distribution of Age of Attrition") + ylab("Count") 
+# The Age of Attrition is lower than the Age of Retention. 
+
+# Visually checking if there is a linear relationship between Monthly Income and Age.
+CaseStudy2.data %>% ggplot(aes(x = Age, y = MonthlyIncome)) + geom_point(color = "red") + geom_smooth() + ggtitle("Monthly Income versus Age") + ylab("Monthly Income")
+# There does not appear to be a linear relationship between Monthly Income and Age. 
+
+# Visually checking the distribution of Hourly Rate and Gender.
+CaseStudy2.data %>% ggplot(aes(x = Gender, y = HourlyRate)) + geom_boxplot(fill = "red") + ggtitle("Distribution of Gender and Hourly Rate") + ylab("Hourly Rate")
+# There is no difference of Hourly Rate by age. 
+```
+Exploring the data generally, we see that there are a few interesting observations about the data. First, there are 730 employees retained and 140 employees lost. This creates a retention rate of 83.9%. Also, the age of attrition appears to be lower than the age of retention. There does not appear to be a linear relationship between the age of an employee and their monthly income. There also does not appear to be a difference in the hourly income by gender. 
+
+## Exploring Job Specific Trends
+```{r Job Specific Trends, echo=FALSE, message=FALSE, warning=FALSE}
+# Visually showing what job role has the highest average hourly rate. 
+CaseStudy2.data %>% group_by(JobRole) %>% summarise(meanHourlyRate = mean(HourlyRate)) %>% ggplot(aes(x = reorder(JobRole, -meanHourlyRate), y = meanHourlyRate)) + geom_col(fill = "red") + ggtitle("Average Hourly Rate by Job Role") + ylab("Average Hourly Rate") + xlab("Job Role") + theme(axis.text.x = element_text(angle = 90))
+# Managers have the highest hourly rate.
+
+# Visually showing what department has the highest average hourly rate. 
+CaseStudy2.data %>% group_by(Department) %>% summarise(meanHourlyRate = mean(HourlyRate)) %>% ggplot(aes(x = reorder(Department, -meanHourlyRate), y = meanHourlyRate)) + geom_col(fill = "red") + ggtitle("Average Hourly Rate by Department") + ylab("Average Hourly Rate") + xlab("Department") + theme(axis.text.x = element_text(angle = 90))
+# Research and Development has the highest hourly rate.
+
+# Visually showing what job role has the highest average job satisfaction.
+CaseStudy2.data %>% group_by(JobRole) %>% summarise(meanJobSat = mean(JobSatisfaction)) %>% ggplot(aes(x = reorder(JobRole, -meanJobSat), y = meanJobSat)) + geom_col(fill = "red") + ggtitle("Average Job Satisfacation by Job Role") + ylab("Average Job Satisfacation") + xlab("Job Role") + theme(axis.text.x = element_text(angle = 90)) 
+# Health Care Representatives have the highest average job satisfaction. 
+
+# Visually showing what job role has the highest average relationship satisfaction with boss. 
+CaseStudy2.data %>% group_by(JobRole) %>% summarise(meanRelSat = mean(RelationshipSatisfaction)) %>% ggplot(aes(x = reorder(JobRole, -meanRelSat), y = meanRelSat)) + geom_col(fill = "red") + ggtitle("Average Relationship Satisfacation WIth Boss by Job Role") + ylab("Average Relationship Satisfacation") + xlab("Job Role") + theme(axis.text.x = element_text(angle = 90))  
+# Human Resources has the highest average relationship satisfaction with their boss. 
+
+# Visually showing what job role has the highest average number of years at the company. 
+CaseStudy2.data %>% group_by(JobRole) %>% summarise(meanYrs = mean(YearsAtCompany)) %>% ggplot(aes(x = reorder(JobRole, -meanYrs), y = meanYrs)) + geom_col(fill = "red") + ggtitle("Average Years at Company by Job Role") + ylab("Average Number of Years at Company") + xlab("Job Role") + theme(axis.text.x = element_text(angle = 90)) 
+# Managers have the highest average number of years at the company. 
+
+#Creating a separate data frame to create percentage of Attrition and Retention by Job Role variables
+Attrition = CaseStudy2.data %>% group_by(JobRole) %>% summarise(countTot = n()) %>% select(JobRole, countTot)
+
+Attrition2 = CaseStudy2.data %>% filter(Attrition == "Yes") %>% group_by(JobRole) %>% summarise(NumAttrition = n()) %>% select(JobRole, NumAttrition)
+
+Attrition3 = CaseStudy2.data %>% filter(Attrition == "No") %>% group_by(JobRole) %>% summarise(NumRetention = n()) %>% select(JobRole, NumRetention)
+
+AttritionRetention = merge(Attrition, Attrition2, by = "JobRole")
+
+AttritionRetention2 = merge(AttritionRetention, Attrition3, by = "JobRole")
+
+AttritionRetention2$PercentAttrition = (AttritionRetention2$NumAttrition/AttritionRetention2$countTot)*100
+
+AttritionRetention2$PercentRetention = (AttritionRetention2$NumRetention/AttritionRetention2$countTot)*100
+
+AttritionRetention2
+
+# Visually showing the percent Attrition by job role in descending order. 
+AttritionRetention2 %>% ggplot(aes(x = reorder(JobRole, -PercentAttrition), y = PercentAttrition)) + geom_col(fill = "red") + ggtitle("Percentage of Attrition by Job Role") + ylab("Percent Attrition") + xlab("Job Role") + theme(axis.text.x = element_text(angle = 90))
+# Sales Representatives have the highest Attrition rate. 
+
+# Visually showing the percent Retention by Job Role in descending order. 
+AttritionRetention2 %>% ggplot(aes(x = reorder(JobRole, -PercentRetention), y = PercentRetention)) + geom_col(fill = "red") + ggtitle("Percentage of Retention by Job Role") + ylab("Percent Retention") + xlab("Job Role") + theme(axis.text.x = element_text(angle = 90))
+# Research Directors have the highest retention rate. 
+```
+Exploring job role specific trends, we find that Managers have the highest average hourly rate while human resources have the lowest. Health Care representatives have the highest average job satisfaction while research directors have the lowest. Human resources have the highest average relationship satisfaction with their managers while research directors have the lowest. Managers have the highest average number of years with the company while sales representatives have the lowest. Which is unsurprising that we find that sales representatives have the highest attrition rate. Research directors have the highest retention rate which may seem odd as we found that research directors have the lowest average job satisfaction and the lowest average relationship satisfaction with their managers. It is also interesting that we found that human resource employees have the highest relationship satisfaction with their managers as they also have the lowest average hourly rate. Nonetheless, these relationships show insights into the reasons employees may choose to stay with the company or leave. 
+
+## Creating the Best Models  
+```{r Model, echo=FALSE, message=FALSE, warning=FALSE}
+# Install Naive Bayes library 
+library(e1071)
+library(caret)
+
+## Creating a model for Attrition
+# Creating a model with all variables 
+model = naiveBayes(Attrition~., data = CaseStudy2.data)
+CM = confusionMatrix(table(predict(model, CaseStudy2.data), as.factor(CaseStudy2.data$Attrition)))
+CM
+
+# Keeping the variables that are to be used in the model.
+CaseStudy2Model = CaseStudy2.data %>% select(Attrition, Age, BusinessTravel, DailyRate, Department, DistanceFromHome, Education, EducationField, EnvironmentSatisfaction, Gender, HourlyRate, JobInvolvement, JobLevel, JobRole, JobSatisfaction, MaritalStatus, MonthlyIncome, MonthlyRate, NumCompaniesWorked, OverTime, PercentSalaryHike, PerformanceRating, RelationshipSatisfaction, StandardHours, StockOptionLevel, TotalWorkingYears, TrainingTimesLastYear, WorkLifeBalance, YearsAtCompany, YearsInCurrentRole, YearsSinceLastPromotion, YearsWithCurrManager)
+# CaseStudy2Model
+
+# Creating a model with the variables selected above
+model2 = naiveBayes(Attrition~., data = CaseStudy2Model)
+CM2 = confusionMatrix(table(predict(model2, CaseStudy2Model), as.factor(CaseStudy2Model$Attrition)))
+CM2
+
+
+
+## Creating a model for Salary
+CaseStudy2.data %>% ggplot(aes(x = as.factor(Education), y = MonthlyIncome)) + geom_boxplot(fill = "red") + ggtitle("Distribution of Monthly Income by Level of Education") + ylab("Monthly Income") + xlab("Education")
+
+CaseStudy2.data %>% ggplot(aes(x = as.factor(JobLevel), y = MonthlyIncome)) + geom_boxplot(fill = "red") + ggtitle("Distribution of Monthyl Income by Job Level") + ylab("Monthly Income") + xlab("Job Level")
+
+CaseStudy2.data %>% ggplot(aes(x = as.factor(YearsWithCurrManager), y = MonthlyIncome)) + geom_boxplot(fill = "red") + ggtitle("Distribution of Monthly Income by Years with Current Manager") + ylab("Monthly Income") + xlab("Years with Current Manager")
+
+fit = lm(MonthlyIncome~Education+JobLevel+YearsWithCurrManager, data = CaseStudy2.data)
+summary(fit)
+
+```
+
+## YouTube Presentation Link 
+<a href="https://youtu.be/zBg-wziVkCs" target="_blank">YouTube Presentation</a>
